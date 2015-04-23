@@ -66,15 +66,78 @@ public class UKCService implements IUKCService {
 
     @Override
     public boolean isEqual(String str1, String str2, String language) {
+        try
+        {
+            str1 = str1.toLowerCase(new Locale(language));
+            str2 = str2.toLowerCase(new Locale(language));
+        }
+        catch (Exception e)
+        {
+            str1 = str1.toLowerCase();
+            str2 = str2.toLowerCase();
+        }
+        ArrayList<String> str1res = new ArrayList<>() ;
+        ArrayList<String> str2res = new ArrayList<>() ;
+
         KnowledgeBase kb = knowledgeBaseService.readKnowledgeBase("uk");
         Vocabulary voc = vocabularyservice.readVocabulary(kb,language);
-        List<WordForm> wordforms1 = vocabularyservice.readWordForms(voc,str1);
-        List<WordForm> wordforms2 = vocabularyservice.readWordForms(voc,str2);
 
-        for(WordForm wf1 : wordforms1)
+        if(vocabularyservice.readMultiWordLemmas(voc).contains(str1))
         {
-        for(WordForm wf2 : wordforms2)
-            if(wf1.getForm().equals(wf2.getForm()))
+            str1res.add(str1);
+        }
+        //if(lemmatizer.isLemmaExists(derivation, language))
+        if(lemmatizer.isLemmaExists(str1, voc))
+        {
+            str1res.add(str1);
+        }
+        else
+        {
+/*          Map<String,Set<String>> alllemmas = lemmatizer.lemmatize(derivation, language);
+            Collection s = alllemmas.values();
+            for(String key : alllemmas.keySet())
+            {
+                for(String lemma : alllemmas.get(key))
+                {
+                    if (null != lemma && !result.contains(lemma)) {
+                        result.add(lemma);
+                    }
+                }
+            }
+            alllemmas.clear();*/
+            str1res.addAll(lemmatizer.lemmatize(str1, voc));
+        }
+
+        if(vocabularyservice.readMultiWordLemmas(voc).contains(str2))
+        {
+            str2res.add(str2);
+        }
+        //if(lemmatizer.isLemmaExists(derivation, language))
+        if(lemmatizer.isLemmaExists(str2, voc))
+        {
+            str2res.add(str2);
+        }
+        else
+        {
+/*          Map<String,Set<String>> alllemmas = lemmatizer.lemmatize(derivation, language);
+            Collection s = alllemmas.values();
+            for(String key : alllemmas.keySet())
+            {
+                for(String lemma : alllemmas.get(key))
+                {
+                    if (null != lemma && !result.contains(lemma)) {
+                        result.add(lemma);
+                    }
+                }
+            }
+            alllemmas.clear();*/
+            str2res.addAll(lemmatizer.lemmatize(str2, voc));
+        }
+
+        for(String str1lemma : str1res)
+        {
+        for(String str2lemma : str2res)
+            if(str1lemma.equals(str2lemma))
             {
                 return true;
             }
@@ -453,7 +516,10 @@ public class UKCService implements IUKCService {
         Vocabulary voc = vocabularyservice.readVocabulary(kb,language);
         List<String> lemmas = new ArrayList<String>();
         List<ISense> senseList = new ArrayList<ISense>();
-        //if(lemmatizer.isLemmaExists(derivation, language))
+
+        if (vocabularyservice.readMultiWordLemmas(voc).contains(derivation)) {
+            lemmas.add(derivation);
+        }
         if(lemmatizer.isLemmaExists(derivation, language)) {
             lemmas.add(derivation);
         } else {
@@ -490,6 +556,9 @@ public class UKCService implements IUKCService {
         Set<String> result = new HashSet<String>();
         KnowledgeBase kb = knowledgeBaseService.readKnowledgeBase("uk");
         Vocabulary voc = vocabularyservice.readVocabulary(kb,language);
+        if (vocabularyservice.readMultiWordLemmas(voc).contains(derivation)) {
+            result.add(derivation);
+        }
         if (lemmatizer.isLemmaExists(derivation, language))
         {
             result.add(derivation);
