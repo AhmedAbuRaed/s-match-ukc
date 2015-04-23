@@ -70,7 +70,13 @@
         <dependency>
             <groupId>it.unitn.disi.sweb</groupId>
             <artifactId>sweb-nlp</artifactId>
-            <version>2.5.0-RELEASE</version>
+            <version>2.5.1-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>it.unitn.disi.sweb</groupId>
+            <artifactId>scroll-lang-es</artifactId>
+            <version>1.0.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>

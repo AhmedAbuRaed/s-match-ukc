@@ -20,6 +20,7 @@ import it.unitn.disi.sweb.core.nlp.parameters.NLPParameters;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -28,6 +29,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by Ahmed on 6/25/14.
@@ -290,14 +293,7 @@ public class UKCService implements IUKCService {
         KnowledgeBase kb = knowledgeBaseService.readKnowledgeBase("uk");
         Vocabulary voc = vocabularyservice.readVocabulary(kb,language);
         List<Word> multiwordsList = vocabularyservice.readMultiWords(voc);
-//        Word a = new Word(voc,"hindu deity");
-//        Word b = new Word(voc,"political administrative division");
-//        Word c = new Word(voc,"physical entity");
         HashMap<String, ArrayList<ArrayList<String>>> tempMultiwords = new HashMap<String, ArrayList<ArrayList<String>>>();
-        //List<Word> multiwordsList = new ArrayList<Word>();
-//        multiwordsList.add(a);
-//        multiwordsList.add(b);
-//        multiwordsList.add(c);
 
         for(int i = 0; i < multiwordsList.size(); i++)
         {
@@ -318,7 +314,6 @@ public class UKCService implements IUKCService {
     }
 
 
-    //public enum relationType {MemberOf, PartOf, SubstanceOf}
     @Override
     public boolean isSourceMoreGeneralThanTarget(ISense source, ISense target) {
         if (!(source instanceof UKCSense) || !(target instanceof UKCSense)) {
@@ -344,24 +339,8 @@ public class UKCService implements IUKCService {
             if (ancestorsOfTarget.contains(sourceConcept)) {
                 return true;
             } else {
-                //PointerTargetTree ptt = PointerUtils.getInheritedMemberHolonyms(targetSyn.getSynset());
-                //PointerTargetNodeList ptnl = PointerUtils.getMemberHolonyms(targetSyn.getSynset());
-                traverseTree(ancestorsOfTarget, sourceSyn);
-            /*    if (!traverseTree(targetAncestors, sourceSyn, relationType.MemberOf)) {
-                    //ptt = PointerUtils.getInheritedPartHolonyms(targetSyn.getSynset());
-                    //ptnl = PointerUtils.getPartHolonyms(targetSyn.getSynset());
-                    if (!traverseTree(targetAncestors, sourceSyn, relationType.PartOf)) {
-                        //ptt = PointerUtils.getInheritedSubstanceHolonyms(targetSyn.getSynset());
-                        //ptnl = PointerUtils.getSubstanceHolonyms(targetSyn.getSynset());
-                        if (traverseTree(targetAncestors, sourceSyn, relationType.SubstanceOf)) {
-                            return true;
-                        }
-                    } else {
-                        return true;
-                    }
-                } else {
-                    return true;
-                }*/
+                // commented for faster processing
+                //return traverseTree(ancestorsOfTarget, sourceSyn);
             }
         }
         return false;
@@ -475,36 +454,19 @@ public class UKCService implements IUKCService {
         List<String> lemmas = new ArrayList<String>();
         List<ISense> senseList = new ArrayList<ISense>();
         //if(lemmatizer.isLemmaExists(derivation, language))
-        if(lemmatizer.isLemmaExists(derivation, voc))
-        {
+        if(lemmatizer.isLemmaExists(derivation, language)) {
             lemmas.add(derivation);
-        }
-        else
-        {
-/*            Map<String,Set<String>> alllemmas = lemmatizer.lemmatize(derivation, language);
-            for(String key : alllemmas.keySet())
-            {
-                for(String lemma : alllemmas.get(key))
-                {
-                    if (null != lemma && !lemmas.contains(lemma)) {
-                        lemmas.add(lemma);
-                    }
-                }
-            }
-            alllemmas.clear();*/
-            lemmas.addAll(lemmatizer.lemmatize(derivation, voc));
+        } else {
+            lemmas.addAll(mapToSet(lemmatizer.lemmatize(derivation, language)));
         }
 
-        for(String lemma: lemmas)
-        {
+        for(String lemma: lemmas) {
             Word word = vocabularyservice.readWord(voc,lemma);
-            if(word == null)
-            {
+            if(word == null) {
                 continue;
             }
             List<Synset> synsets = word.getSynsets();
-            for(int i=0;i<synsets.size();i++)
-            {
+            for(int i=0;i<synsets.size();i++) {
                 Concept concept = synsets.get(i).getConcept();
                 ISense s = new UKCSense(concept.getId(),synsets.get(i).getId(),language,this);
                 senseList.add(s);
@@ -525,41 +487,29 @@ public class UKCService implements IUKCService {
             derivation = derivation.toLowerCase();
         }
 
-        List<String> result = new ArrayList<String>();
+        Set<String> result = new HashSet<String>();
         KnowledgeBase kb = knowledgeBaseService.readKnowledgeBase("uk");
         Vocabulary voc = vocabularyservice.readVocabulary(kb,language);
-        //if(lemmatizer.isLemmaExists(derivation, language))
-        if(lemmatizer.isLemmaExists(derivation, voc))
+        if (lemmatizer.isLemmaExists(derivation, language))
         {
             result.add(derivation);
         }
-        else
-        {
-/*            Map<String,Set<String>> alllemmas = lemmatizer.lemmatize(derivation, language);
-
-*//*            Map<String,Set<String>> alllemmas = new HashMap<>();
-            Set setA = new HashSet();
-            setA.add("course");
-            setA.add("university");
-            alllemmas.put("cool", setA);*//*
-
-            Collection s = alllemmas.values();
-            for(String key : alllemmas.keySet())
-            {
-                for(String lemma : alllemmas.get(key))
-                {
-                    if (null != lemma && !result.contains(lemma)) {
-                        result.add(lemma);
-                    }
-                }
-            }
-            alllemmas.clear();*/
-            result.addAll(lemmatizer.lemmatize(derivation, voc));
-        }
+        Map<String,Set<String>> map = lemmatizer.lemmatize(derivation, language);
+        result.addAll(mapToSet(map));
         if (0 == result.size()) {
             result.add(derivation);
         }
 
-        return result;
+        List<String> ret = new ArrayList<String>();
+        ret.addAll(result);
+        return ret;
+    }
+    
+    private Set<String> mapToSet(Map<String,Set<String>> map) {
+        Set<String> set = new HashSet<String>();
+        for (Set s : map.values()) {
+            set.addAll(s);
+        }
+        return set;
     }
 }
