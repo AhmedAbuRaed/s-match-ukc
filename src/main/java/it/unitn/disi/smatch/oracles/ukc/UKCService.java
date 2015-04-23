@@ -87,7 +87,7 @@ public class UKCService implements IUKCService {
             str1res.add(str1);
         }
         //if(lemmatizer.isLemmaExists(derivation, language))
-        if(lemmatizer.isLemmaExists(str1, voc))
+        if(lemmatizer.isLemmaExists(str1, language))
         {
             str1res.add(str1);
         }
@@ -105,7 +105,7 @@ public class UKCService implements IUKCService {
                 }
             }
             alllemmas.clear();*/
-            str1res.addAll(lemmatizer.lemmatize(str1, voc));
+            str1res.addAll(mapToSet(lemmatizer.lemmatize(str1, language)));
         }
 
         if(vocabularyservice.readMultiWordLemmas(voc).contains(str2))
@@ -113,7 +113,7 @@ public class UKCService implements IUKCService {
             str2res.add(str2);
         }
         //if(lemmatizer.isLemmaExists(derivation, language))
-        if(lemmatizer.isLemmaExists(str2, voc))
+        if(lemmatizer.isLemmaExists(str2, language))
         {
             str2res.add(str2);
         }
@@ -131,7 +131,7 @@ public class UKCService implements IUKCService {
                 }
             }
             alllemmas.clear();*/
-            str2res.addAll(lemmatizer.lemmatize(str2, voc));
+            str2res.addAll(mapToSet(lemmatizer.lemmatize(str2, language)));
         }
 
         for(String str1lemma : str1res)
