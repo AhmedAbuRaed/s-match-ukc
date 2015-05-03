@@ -82,12 +82,12 @@ public class UKCService implements IUKCService {
         KnowledgeBase kb = knowledgeBaseService.readKnowledgeBase("uk");
         Vocabulary voc = vocabularyservice.readVocabulary(kb,language);
 
-        if(vocabularyservice.readMultiWordLemmas(voc).contains(str1))
+        if (vocabularyservice.readMultiWordLemmas(voc).contains(str1))
         {
             str1res.add(str1);
         }
         //if(lemmatizer.isLemmaExists(derivation, language))
-        if(lemmatizer.isLemmaExists(str1, language))
+        if (lemmatizer.isLemmaExists(null, str1, language))
         {
             str1res.add(str1);
         }
@@ -105,15 +105,15 @@ public class UKCService implements IUKCService {
                 }
             }
             alllemmas.clear();*/
-            str1res.addAll(mapToSet(lemmatizer.lemmatize(str1, language)));
+            str1res.addAll(mapToSet(lemmatizer.lemmatize(null, str1, language)));
         }
 
-        if(vocabularyservice.readMultiWordLemmas(voc).contains(str2))
+        if (vocabularyservice.readMultiWordLemmas(voc).contains(str2))
         {
             str2res.add(str2);
         }
         //if(lemmatizer.isLemmaExists(derivation, language))
-        if(lemmatizer.isLemmaExists(str2, language))
+        if (lemmatizer.isLemmaExists(null, str2, language))
         {
             str2res.add(str2);
         }
@@ -131,7 +131,7 @@ public class UKCService implements IUKCService {
                 }
             }
             alllemmas.clear();*/
-            str2res.addAll(mapToSet(lemmatizer.lemmatize(str2, language)));
+            str2res.addAll(mapToSet(lemmatizer.lemmatize(null, str2, language)));
         }
 
         for(String str1lemma : str1res)
@@ -520,10 +520,10 @@ public class UKCService implements IUKCService {
         if (vocabularyservice.readMultiWordLemmas(voc).contains(derivation)) {
             lemmas.add(derivation);
         }
-        if(lemmatizer.isLemmaExists(derivation, language)) {
+        if (lemmatizer.isLemmaExists(null, derivation, language)) {
             lemmas.add(derivation);
         } else {
-            lemmas.addAll(mapToSet(lemmatizer.lemmatize(derivation, language)));
+            lemmas.addAll(mapToSet(lemmatizer.lemmatize(null, derivation, language)));
         }
 
         for(String lemma: lemmas) {
@@ -559,11 +559,11 @@ public class UKCService implements IUKCService {
         if (vocabularyservice.readMultiWordLemmas(voc).contains(derivation)) {
             result.add(derivation);
         }
-        if (lemmatizer.isLemmaExists(derivation, language))
+        if (lemmatizer.isLemmaExists(null, derivation, language))
         {
             result.add(derivation);
         }
-        Map<String,Set<String>> map = lemmatizer.lemmatize(derivation, language);
+        Map<String,Set<String>> map = lemmatizer.lemmatize(null, derivation, language);
         result.addAll(mapToSet(map));
         if (0 == result.size()) {
             result.add(derivation);
